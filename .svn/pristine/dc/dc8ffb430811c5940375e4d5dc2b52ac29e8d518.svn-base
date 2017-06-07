@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AppProtoype.Models
+{
+    public class CouponModel
+    {
+        public int CouponID { get; set; }
+        public string Category { get; set; }
+        public string ImageUrl { get; set; }
+        public string ImageCaption { get; set; }
+        public string  Code { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string MoreDetails { get; set; }
+    }
+}

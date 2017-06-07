@@ -1,0 +1,80 @@
+﻿using AppProtoype.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+
+using Xamarin.Forms;
+
+namespace AppProtoype
+{
+    public class OfferPage : ContentPage
+    {
+        public OfferPage()
+        {
+            Title = "Offers";
+            Icon = "icon-offers.png";
+
+            //List<ImageSlide>
+            //CouponModelData sliderCollection = new CouponModelData();
+            //List<CouponModel> sliderImages = sliderCollection.SliderCollection.ToList();
+
+            //Content = new StackLayout
+            //{
+            //    Children = {
+            //        new ListView
+            //        {
+            //            ItemTemplate = BuildSliderViewDataTemplate(),
+            //            ItemsSource = sliderImages
+            //        }
+            //    }
+            //};
+
+            Padding = new Thickness(20, Device.OnPlatform(40, 20, 20), 20, 20);
+            BackgroundImage = "bg-inner.jpg";
+        }
+
+        private DataTemplate BuildSliderViewDataTemplate()
+        {
+            var tapGestureRecognizer = new TapGestureRecognizer();
+            tapGestureRecognizer.Tapped += OnTapGestureRecognizerTapped;
+
+            DataTemplate sliderDataTemplate = new DataTemplate(() => {
+                Grid grid = new Grid
+                {
+                    RowDefinitions =
+                    {
+                        new RowDefinition { Height = GridLength.Auto },
+                        new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }
+
+                    }
+                };
+
+                Image sliderImage = new Image();
+                sliderImage.SetBinding(Image.SourceProperty, "ImageUrl");
+
+
+                sliderImage.GestureRecognizers.Add(tapGestureRecognizer);
+                //tapGestureRecognizer.Tapped += (s, e) =>
+                //{
+                //    sliderImage.Opacity = .5;
+
+                //};
+                //sliderImage.GestureRecognizers.Add(tapGestureRecognizer);
+
+                grid.Children.Add(sliderImage, 0, 0);
+                Grid.SetRowSpan(sliderImage, 2);
+
+                return grid;
+            });
+
+            return sliderDataTemplate;
+        }
+
+        private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

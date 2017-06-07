@@ -1,0 +1,801 @@
+﻿using AppProtoype.Models;
+using AppProtoype.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+
+using Xamarin.Forms;
+using XLabs.Forms.Controls;
+using XLabs;
+using System.ComponentModel;
+
+namespace AppProtoype
+{
+    public class AppointmentPage : ContentPage
+    {
+        ListView contentListView;
+        int _currentStep = 1;
+
+        public List<StoreModel> StoreModelList { get; set; }
+        public List<string> SelectedServices { get; set; }
+        public StoreModel CurrentStore { get; set; }
+        public AppointmentDetails CurrentAppointment {get; set;}
+        public bool ServiceSelected { get; set; }
+        ImageButton ServiceNextButton = new ImageButton();
+        ImageButton DateTimeNextButton = new ImageButton();
+        ImageButton DetailsNextButton = new ImageButton();
+
+
+        public AppointmentPage(int storeID = 0, int prevStep = 0, AppointmentDetails appointment = null)
+        {
+            _currentStep = ++prevStep;
+            StoreModelData storeCollection = new StoreModelData();
+            StoreModelList = new List<StoreModel>();
+            StoreModelList = storeCollection.StoreCollection.ToList();
+
+            Title = "SCHEDULE APPOINTMENT";
+
+            Label stepTitle = new Label();
+            stepTitle.VerticalOptions = LayoutOptions.Center;
+            stepTitle.HorizontalOptions = LayoutOptions.Start;
+            stepTitle.Text = GetStepLabelString();
+            stepTitle.TextColor = Color.White;
+            stepTitle.FontSize = 16;
+            stepTitle.FontAttributes = FontAttributes.Bold;
+            stepTitle.Margin = new Thickness(20, 20, 0, 0);
+
+            CurrentAppointment = new AppointmentDetails();
+            if (storeID == 0)
+            {
+
+                contentListView = new ListView { HasUnevenRows = true, BackgroundColor = Color.Transparent, SeparatorColor = Color.White, HorizontalOptions = LayoutOptions.FillAndExpand };
+
+                contentListView.ItemSelected += OnItemSelected;
+                contentListView.ItemTemplate = BuildCellViewDataTemplate();
+                contentListView.ItemsSource = StoreModelList;
+
+                
+
+                Content = new StackLayout
+                {
+                    Children = {
+                        stepTitle,
+                        contentListView
+                    }
+                };
+            }
+            else
+            {
+                if (appointment == null)
+                {
+                    appointment = new AppointmentDetails();
+                }
+                else
+                {
+
+                    CurrentAppointment = appointment;
+                }
+
+                switch (_currentStep)
+                {
+                    case 2: GotoStep2(stepTitle);
+                        break;
+                    case 3: GoToStep3(stepTitle);
+                        break;
+                    case 4: GoToStep4(stepTitle);
+                        break;
+                    case 5:
+                        GoToStep5(stepTitle);
+                        break;
+                }
+                 
+            }
+            Padding = new Thickness(0, 0, 0, 20);
+
+            BackgroundImage = "bg-inner.jpg";
+        }
+
+        private void GotoStep2(Label stepTitle)
+        {
+            SelectedServices = new List<string>();
+
+            StackLayout currentSelectionsStack = BuildCurrentSelections();
+
+            var headerAreaStack = new StackLayout
+            {
+                VerticalOptions = LayoutOptions.Start,
+                BackgroundColor = Color.Black,
+                Children = {
+                        stepTitle,
+                        currentSelectionsStack
+                    }
+            };
+
+            StackLayout step2Stack = BuildStep2View();
+
+            Content = new StackLayout
+            {
+                Children = {
+                        headerAreaStack,
+                        step2Stack
+                    }
+            };
+        }
+
+        private void GoToStep3(Label stepTitle)
+        {
+            StackLayout currentSelectionsStack = BuildCurrentSelections();
+
+            var headerAreaStack = new StackLayout
+            {
+                VerticalOptions = LayoutOptions.Start,
+                BackgroundColor = Color.Black,
+                Children = {
+                        stepTitle,
+                        currentSelectionsStack
+                    }
+            };
+
+            StackLayout step3Stack = BuildStep3View();
+
+            Content = new StackLayout
+            {
+                Children = {
+                        headerAreaStack,
+                        step3Stack
+                    }
+            };
+        }
+
+        private void GoToStep4(Label stepTitle)
+        {
+            StackLayout currentSelectionsStack = BuildCurrentSelections();
+
+            var headerAreaStack = new StackLayout
+            {
+                VerticalOptions = LayoutOptions.Start,
+                BackgroundColor = Color.Black,
+                Children = {
+                        stepTitle,
+                        currentSelectionsStack
+                    }
+            };
+
+            StackLayout step4Stack = BuildStep4View();
+
+            Content = new StackLayout
+            {
+                Children = {
+                        headerAreaStack,
+                        step4Stack
+                    }
+            };
+
+        }
+
+        private void GoToStep5(Label stepTitle)
+        {
+            StackLayout currentSelectionsStack = BuildCurrentSelections();
+            currentSelectionsStack.BackgroundColor = Color.Transparent;
+            var headerAreaStack = new StackLayout
+            {
+                VerticalOptions = LayoutOptions.Start,
+                Children = {
+                        stepTitle,
+                        currentSelectionsStack
+                    }
+            };
+
+            StackLayout step5Stack = BuildStep5View();
+            step5Stack.Margin = new Thickness(20, 0, 0, 10);
+
+            Content = new StackLayout
+            {
+                Children = {
+                        headerAreaStack,
+                        step5Stack
+                    }
+            };
+
+        }
+
+        private DataTemplate BuildCellViewDataTemplate()
+        {
+            DataTemplate couponItemTemplate = new DataTemplate(() => {
+                var nativeCell = new StoreViewModel();
+
+
+                Label storeTitleLabel = new Label();
+                storeTitleLabel.VerticalOptions = LayoutOptions.Center;
+                storeTitleLabel.SetBinding(Label.TextProperty, "StoreName");
+                storeTitleLabel.FontSize = 14;
+
+                Image arrowImage = new Image();
+                arrowImage.Source = "offerarwbg.png";
+
+                nativeCell.SetBinding(StoreViewModel.Address1Property, "Address1");
+                nativeCell.SetBinding(StoreViewModel.CityProperty, "City");
+                nativeCell.SetBinding(StoreViewModel.StateProperty, "State");
+                nativeCell.SetBinding(StoreViewModel.ZipCodeProperty, "ZipCode");
+
+                Label addressLabel = new Label();
+                addressLabel.VerticalOptions = LayoutOptions.Start;
+                addressLabel.HorizontalOptions = LayoutOptions.Start;
+                addressLabel.SetBinding(Label.TextProperty, "AddressDisplay");
+                addressLabel.FontSize = 12;
+                addressLabel.TextColor = Color.FromHex("#A7A7A7");
+                //addressLabel.HeightRequest = 50;
+                Label contactLabel = new Label();
+
+                Label phoneDisplay = new Label();
+                phoneDisplay.VerticalOptions = LayoutOptions.Start;
+                phoneDisplay.HorizontalOptions = LayoutOptions.Start;
+                phoneDisplay.SetBinding(Label.TextProperty, "PhoneDisplay");
+                phoneDisplay.FontSize = 12;
+                phoneDisplay.TextColor = Color.FromHex("#A7A7A7");
+
+
+                RelativeLayout layout = new RelativeLayout();
+                //layout.BackgroundColor = Color.Blue;
+                layout.Children.Add(arrowImage,
+                    Constraint.Constant(0),
+                    Constraint.Constant(0),
+                    Constraint.RelativeToParent((parent) => { return parent.Width - 50; }),
+                    Constraint.RelativeToParent((parent) => { return parent.Height; }));
+
+                layout.Children.Add(storeTitleLabel,
+                    Constraint.Constant(0),
+                    Constraint.Constant(0),
+                    Constraint.RelativeToParent((parent) => { return parent.Width; }),
+                    Constraint.RelativeToParent((parent) => { return parent.Height; }));
+
+                var secondColStack = new StackLayout
+                {
+                    Padding = new Thickness(20, 5, 5, 5),
+                    Orientation = StackOrientation.Vertical,
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    Children = {
+                        layout,
+                        addressLabel,
+                        phoneDisplay
+                    }
+                };
+
+                nativeCell.View = secondColStack;
+                nativeCell.ForceUpdateSize();
+
+                return nativeCell;
+
+            });
+
+            return couponItemTemplate;
+        }
+
+        private StackLayout BuildStep2View()
+        {
+            StoreModel currentStore = CurrentAppointment.SelectedStore;
+
+            var servicesStack = new StackLayout
+            {
+                Padding = new Thickness(10, 10, 0, 0),
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+            };
+
+            ServiceModelData servicesCollection = new ServiceModelData();
+            List<ServiceModel> services = servicesCollection.ServiceCollection.ToList();
+            foreach (ServiceModel service in services.Where(s => s.RetailerID == currentStore.StoreID))
+            {
+
+                CheckBox cbox = new CheckBox();
+                cbox.DefaultText = service.ServiceName;
+                cbox.TextColor = Color.White;
+                cbox.StyleId = service.ServiceID.ToString();
+                cbox.CheckedChanged += OnCheckboxSelected;
+
+                servicesStack.Children.Add(cbox);
+            }
+
+            
+            ServiceNextButton.BackgroundColor = Color.Yellow;
+            ServiceNextButton.Text = "NEXT";
+            ServiceNextButton.TextColor = Color.Black;
+            ServiceNextButton.Margin = 50;
+            ServiceNextButton.IsEnabled = false;
+            ServiceNextButton.Clicked += GoToStep3;
+
+            var mainContentStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                
+                Children = {
+                    servicesStack,
+                    ServiceNextButton
+                    }
+            };
+
+            return mainContentStack;
+        }
+
+        private StackLayout BuildStep3View()
+        {
+            CalendarView calendar = new CalendarView();
+            calendar.HorizontalOptions = LayoutOptions.CenterAndExpand;
+            calendar.VerticalOptions = LayoutOptions.Center;
+            calendar.MinDate = new DateTime(DateTime.Now.Date.Year, DateTime.Now.Date.Month - 1, DateTime.Now.Date.Day);
+            calendar.MaxDate = new DateTime(2020, 12, 31);
+            calendar.Margin = new Thickness(0, 40, 0, 40);
+            calendar.Scale = 1.25;
+            calendar.DateSelected += SaveDateSelected;
+
+            TimePicker timePicker = new TimePicker();
+            timePicker.Time = new TimeSpan(8, 0, 0);
+            timePicker.HorizontalOptions = LayoutOptions.FillAndExpand;
+            timePicker.PropertyChanged += SaveTimeSelected;
+
+            DateTimeNextButton.BackgroundColor = Color.Yellow;
+            DateTimeNextButton.Text = "NEXT";
+            DateTimeNextButton.TextColor = Color.Black;
+            DateTimeNextButton.Margin = 10;
+            DateTimeNextButton.Clicked += GoToStep4;
+
+            var mainContentStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+
+                Children = {
+                    calendar,
+                    timePicker,
+                    DateTimeNextButton
+                    }
+            };
+
+            return mainContentStack;
+
+        }
+
+        private StackLayout BuildStep4View()
+        {
+            Label personalDetailsLabel = new Label();
+            personalDetailsLabel.Text = "Personal Details";
+            personalDetailsLabel.TextColor = Color.White;
+            personalDetailsLabel.FontSize = 16;
+
+            Entry nameTextBox = new Entry() { Placeholder = "Full Name" };
+            nameTextBox.BindingContext = CurrentAppointment;
+            nameTextBox.SetBinding(Entry.TextProperty, "FullName");
+
+            Entry addressLine1TextBox = new Entry() { Placeholder = "Address Line" };
+            addressLine1TextBox.BindingContext = CurrentAppointment;
+            addressLine1TextBox.SetBinding(Entry.TextProperty, "Addressline");
+
+            Entry cityTextBox = new Entry() { Placeholder = "City" };
+            cityTextBox.BindingContext = CurrentAppointment;
+            cityTextBox.SetBinding(Entry.TextProperty, "City");
+
+            Entry stateProvRegionTextBox = new Entry() { Placeholder = "State/Province/Region" };
+            stateProvRegionTextBox.BindingContext = CurrentAppointment;
+            stateProvRegionTextBox.SetBinding(Entry.TextProperty, "StateCityRegion");
+
+            Entry zipTextBox = new Entry() { Placeholder = "Zip" };
+            zipTextBox.BindingContext = CurrentAppointment;
+            zipTextBox.SetBinding(Entry.TextProperty, "Zip");
+
+            Entry phoneTextBox = new Entry() { Placeholder = "Contact No." };
+            phoneTextBox.BindingContext = CurrentAppointment;
+            phoneTextBox.SetBinding(Entry.TextProperty, "ContactNumber");
+
+            var personalDetailsStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+
+                Children = {
+                            personalDetailsLabel,
+                            nameTextBox,
+                            addressLine1TextBox,
+                            cityTextBox,
+                            stateProvRegionTextBox,
+                            zipTextBox,
+                            phoneTextBox
+                        }
+            };
+
+
+
+            Label vehiclesDetailsLabel = new Label();
+            vehiclesDetailsLabel.Text = "Vehicle Details";
+            vehiclesDetailsLabel.TextColor = Color.White;
+            vehiclesDetailsLabel.FontSize = 16;
+
+            Entry vehicleYearTextBox = new Entry() { Placeholder = "Year" };
+            vehicleYearTextBox.BindingContext = CurrentAppointment;
+            vehicleYearTextBox.SetBinding(Entry.TextProperty, "VehicleYear");
+
+            Entry vehicleMakeTextBox = new Entry() { Placeholder = "Make" };
+            vehicleMakeTextBox.BindingContext = CurrentAppointment;
+            vehicleMakeTextBox.SetBinding(Entry.TextProperty, "VehicleMake");
+
+            Entry vehicleModelTextBox = new Entry() { Placeholder = "Model" };
+            vehicleModelTextBox.BindingContext = CurrentAppointment;
+            vehicleModelTextBox.SetBinding(Entry.TextProperty, "VehicleModel");
+
+            Entry vehicleOptionTextBox = new Entry() { Placeholder = "Option" };
+            vehicleOptionTextBox.BindingContext = CurrentAppointment;
+            vehicleOptionTextBox.SetBinding(Entry.TextProperty, "VehicleOption");
+
+            var vehicleDetailsStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+
+                Children = {
+                            vehiclesDetailsLabel,
+                            vehicleYearTextBox,
+                            vehicleMakeTextBox,
+                            vehicleModelTextBox,
+                            vehicleOptionTextBox
+                        }
+            };
+
+            DetailsNextButton.BackgroundColor = Color.Yellow;
+            DetailsNextButton.Text = "NEXT";
+            DetailsNextButton.TextColor = Color.Black;
+            DetailsNextButton.Margin = 20;
+            DetailsNextButton.Clicked += GoToStep5;
+
+
+            var mainContentStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(20, 0, 20, 0),
+
+                Children = {
+                            personalDetailsStack,
+                            vehicleDetailsStack,
+                            DetailsNextButton
+                        }
+            };
+
+            return mainContentStack;
+        }
+
+        private StackLayout BuildStep5View()
+        {
+            Label personalDetailsLabel = new Label();
+            personalDetailsLabel.Text = "Personal Details: ";
+            personalDetailsLabel.FontAttributes = FontAttributes.Bold;
+            personalDetailsLabel.TextColor = Color.White;
+
+            Label nameLabel = new Label();
+            nameLabel.Text = CurrentAppointment.FullName;
+            nameLabel.TextColor = Color.White;
+
+            Label addressLabel = new Label();
+            string fullAdd = CurrentAppointment.Zip + " " + CurrentAppointment.Addressline +", " + CurrentAppointment.City + ", " + CurrentAppointment.StateCityRegion;
+            addressLabel.Text = fullAdd;
+            addressLabel.TextColor = Color.White;
+
+
+            Label contactLabel = new Label();
+            contactLabel.Text = CurrentAppointment.ContactNumber;
+            contactLabel.TextColor = Color.White;
+
+            var personalDetailsStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(0, 0, 0, 20),
+                Children = {
+                            personalDetailsLabel,
+                            nameLabel,
+                            addressLabel,
+                            contactLabel
+
+                        }
+            };
+
+            Label vehicleLabel = new Label();
+            vehicleLabel.Text = "Vehicle Details: ";
+            vehicleLabel.FontAttributes = FontAttributes.Bold; 
+            vehicleLabel.TextColor = Color.White;
+
+            string fullVehicle = CurrentAppointment.VehicleYear + " " + CurrentAppointment.VehicleMake + " " + CurrentAppointment.VehicleModel + " " + CurrentAppointment.VehicleOption;
+
+            Label customerVehicle = new Label();
+            customerVehicle.Text = fullVehicle;
+            customerVehicle.TextColor = Color.White;
+
+            
+            var vehicleDetailsStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(0, 0, 0, 0),
+                Children = {
+                            vehicleLabel,
+                            customerVehicle
+
+                        }
+            };
+
+            ImageButton submitButton = new ImageButton();
+
+            submitButton.BackgroundColor = Color.Yellow;
+            submitButton.Text = "SUBMIT";
+            submitButton.TextColor = Color.Black;
+            submitButton.Margin = 30;
+            submitButton.Clicked += SubmitAppointmentRequest;
+
+
+            
+
+
+            var mainContentStack = new StackLayout
+            {
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+
+                Children = {
+                            personalDetailsStack,
+                            vehicleDetailsStack,
+                            submitButton
+
+                        }
+            };
+
+
+            return mainContentStack;
+        }
+
+        async void SubmitAppointmentRequest(object sender, EventArgs e)
+        {
+            await DisplayAlert("", "Request Submitted", "OK");
+
+            await Navigation.PopAsync();
+        }
+
+        private void SaveTimeSelected(object sender, PropertyChangedEventArgs e)
+        {
+            var selectedTime = (TimePicker)sender;
+            DateTime tempDate = CurrentAppointment.AppointmentTime.Date;
+
+            TimeSpan convertedTime = new TimeSpan(selectedTime.Time.Hours, selectedTime.Time.Minutes, 0);
+            CurrentAppointment.AppointmentTime = tempDate + convertedTime;
+
+        }
+
+        private void SaveDateSelected(object sender, DateTime e)
+        {
+            CurrentAppointment.AppointmentTime = e.Date;
+        }
+
+        private StackLayout BuildCurrentSelections()
+        {
+            StoreModel currentStore = CurrentAppointment.SelectedStore;
+            Label currentSelections = new Label();
+            string currentStoreText = string.Empty;
+            string currentServiceText = string.Empty;
+            string currentDateTimeText = string.Empty;
+
+            Label locationTitle = new Label();
+            locationTitle.FontAttributes = FontAttributes.Bold;
+            locationTitle.Text = "Store Location:";
+            locationTitle.TextColor = Color.White;
+            locationTitle.FontSize = 16;
+
+            Label locationValue = new Label();
+            Label servicesValue = new Label();
+            Label dateTimeValue = new Label();
+
+            Label serviceTitle = new Label();
+            serviceTitle.FontAttributes = FontAttributes.Bold;
+            serviceTitle.Text = "Service/s:";
+            serviceTitle.TextColor = Color.White;
+            serviceTitle.FontSize = 16;
+
+            Label dateTimeTitle = new Label();
+            dateTimeTitle.FontAttributes = FontAttributes.Bold;
+            dateTimeTitle.Text = "Date and Time:";
+            dateTimeTitle.TextColor = Color.White;
+            dateTimeTitle.FontSize = 16;
+
+            var selectionsStack = new StackLayout
+            {
+                VerticalOptions = LayoutOptions.Start,
+                BackgroundColor = Color.Black,
+                Margin = new Thickness(20, 0, 0, 10)
+            };
+
+            switch (_currentStep)
+            {
+                case 2:
+                    currentStoreText =  currentStore.StoreName + "\n"
+                                        + currentStore.AddressDisplay;
+
+                    locationValue.Text = currentStoreText;
+                    locationValue.VerticalOptions = LayoutOptions.Center;
+                    locationValue.TextColor = Color.White;
+                    locationValue.FontSize = 16;
+
+                    selectionsStack.Children.Add(locationTitle);
+                    selectionsStack.Children.Add(locationValue);
+
+                    break;
+
+                case 3:
+                    currentStoreText = currentStore.StoreName + "\n"
+                                        + currentStore.AddressDisplay;
+
+                    locationValue.Text = currentStoreText;
+                    locationValue.VerticalOptions = LayoutOptions.Center;
+                    locationValue.TextColor = Color.White;
+                    locationValue.FontSize = 16;
+
+                    foreach(ServiceModel service in CurrentAppointment.SelectedServices)
+                    {
+                        currentServiceText += service.ServiceName;
+
+                        if (service != CurrentAppointment.SelectedServices.Last())
+                        {
+                            currentServiceText += ", ";
+                        }
+                    }
+
+                    servicesValue.Text = currentServiceText;
+                    servicesValue.VerticalOptions = LayoutOptions.Center;
+                    servicesValue.TextColor = Color.White;
+                    servicesValue.FontSize = 16;
+
+                    selectionsStack.Children.Add(locationTitle);
+                    selectionsStack.Children.Add(locationValue);
+
+                    selectionsStack.Children.Add(serviceTitle);
+                    selectionsStack.Children.Add(servicesValue);
+
+                    break;
+                case 5:
+                    currentStoreText = currentStore.StoreName + "\n"
+                                        + currentStore.AddressDisplay;
+
+                    locationValue.Text = currentStoreText;
+                    locationValue.VerticalOptions = LayoutOptions.Center;
+                    locationValue.TextColor = Color.White;
+                    locationValue.FontSize = 16;
+
+                    
+                    foreach (ServiceModel service in CurrentAppointment.SelectedServices)
+                    {
+                        currentServiceText += service.ServiceName;
+
+                        if (service != CurrentAppointment.SelectedServices.Last())
+                        {
+                            currentServiceText += ", ";
+                        }
+                    }
+
+                    servicesValue.Text = currentServiceText;
+                    servicesValue.VerticalOptions = LayoutOptions.Center;
+                    servicesValue.TextColor = Color.White;
+                    servicesValue.FontSize = 16;
+
+                    currentDateTimeText += CurrentAppointment.AppointmentTime.ToString();
+
+                    dateTimeValue.VerticalOptions = LayoutOptions.Center;
+                    dateTimeValue.TextColor = Color.White;
+                    dateTimeValue.FontSize = 16;
+                    dateTimeValue.Text = currentDateTimeText;
+
+                    selectionsStack.Children.Add(locationTitle);
+                    selectionsStack.Children.Add(locationValue);
+
+                    selectionsStack.Children.Add(serviceTitle);
+                    selectionsStack.Children.Add(servicesValue);
+
+                    selectionsStack.Children.Add(dateTimeTitle);
+                    selectionsStack.Children.Add(dateTimeValue);
+
+
+                    break;
+            }
+
+            return selectionsStack;
+        }
+
+        private string GetStepLabelString()
+        {
+            switch (_currentStep)
+            {
+                case 1: return "SELECT LOCATION";
+                case 2: return "SELECT SERVICES";
+                case 3: return "SELECT APPOINTMENT DATE AND TIME";
+                case 4: return "ENTER ADDITIONAL DETAILS";
+                case 5: return "CONFIRM DETAILS";
+                default: return "";
+            }
+        }
+
+        async void GoToStep3(object sender, EventArgs e)
+        {
+            //CurrentAppointment.SelectedServices = SelectedServices;
+
+            List<ServiceModel> allServices = new List<ServiceModel>();
+            ServiceModelData serviceData = new ServiceModelData();
+
+            allServices = serviceData.ServiceCollection.ToList();
+
+
+            IEnumerable<ServiceModel> selectedServicesObject = from ser in allServices
+                                                         where SelectedServices.Contains(ser.ServiceID.ToString())
+                                                         select ser;
+
+            CurrentAppointment.SelectedServices = selectedServicesObject.ToList();
+
+
+            await Navigation.PushAsync(new AppointmentPage(CurrentAppointment.SelectedStore.StoreID, _currentStep, CurrentAppointment));
+        }
+
+
+        async void GoToStep4(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new AppointmentPage(CurrentAppointment.SelectedStore.StoreID, _currentStep, CurrentAppointment));
+
+        }
+
+        async void GoToStep5(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new AppointmentPage(CurrentAppointment.SelectedStore.StoreID, _currentStep, CurrentAppointment));
+
+        }
+
+        private void OnCheckboxSelected(object sender, EventArgs<bool> e)
+        {
+            CheckBox isCheckedOrNot = (CheckBox)sender;
+            if (isCheckedOrNot.Checked)
+            {
+                if (!SelectedServices.Contains(isCheckedOrNot.StyleId))
+                {
+                    SelectedServices.Add(isCheckedOrNot.StyleId);
+                }
+            }
+            else
+            {
+                if (SelectedServices.Contains(isCheckedOrNot.StyleId))
+                {
+                    SelectedServices.Remove(isCheckedOrNot.StyleId);
+                }
+            }
+
+            if (SelectedServices.Count > 0)
+            {
+                ServiceNextButton.IsEnabled = true;
+            }
+            else
+            {
+                ServiceNextButton.IsEnabled = false;
+            }
+        }
+
+        async void OnItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem == null)
+            {
+                return;
+            }
+
+            // Deselect row
+            contentListView.SelectedItem = null;
+
+            dynamic store = e.SelectedItem;
+            CurrentAppointment.SelectedStore = store;
+
+            await Navigation.PushAsync(new AppointmentPage(CurrentAppointment.SelectedStore.StoreID, _currentStep, CurrentAppointment));
+
+        }
+    }
+}

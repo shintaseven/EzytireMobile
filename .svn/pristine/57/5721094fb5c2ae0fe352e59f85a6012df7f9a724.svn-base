@@ -1,0 +1,48 @@
+﻿using System;
+using Xamarin.Forms;
+
+namespace AppProtoype
+{
+    public class MainPage : TabbedPage
+    {
+        public MainPage()
+        {
+
+            var homeNavPage = new NavigationPage(new HomePage());
+            homeNavPage.Title = "Home";
+            homeNavPage.Icon = "home01-text.png";
+            homeNavPage.BarTextColor = Color.White;
+            homeNavPage.BarBackgroundColor = Color.Black;
+            Children.Add(homeNavPage);
+            
+            var apptNavPage = new NavigationPage(new AppointmentPage());
+            apptNavPage.Title = "Appointments";
+            apptNavPage.Icon = "appoint01-text.png";
+            apptNavPage.BarTextColor = Color.White;
+            apptNavPage.BarBackgroundColor = Color.Black;
+            Children.Add(apptNavPage);
+
+            var vehNavPage = new NavigationPage(new VehiclePage());
+            vehNavPage.Title = "My Vehicle";
+            vehNavPage.Icon = "vehicle01-text.png";
+            vehNavPage.BarTextColor = Color.White;
+            vehNavPage.BarBackgroundColor = Color.Black;
+            Children.Add(vehNavPage);
+
+            var offersPage = new NavigationPage(new OfferPage());
+            offersPage.Title = "Coupons";
+            offersPage.Icon = "offer01-text.png";
+            offersPage.BarTextColor = Color.White;
+            offersPage.BarBackgroundColor = Color.Black;
+            Children.Add(offersPage);
+
+            var locationNavPage = new NavigationPage(new LocationPage());
+            locationNavPage.Title = "Locations";
+            locationNavPage.Icon = "location01-text.png";
+            locationNavPage.BarTextColor = Color.White;
+            locationNavPage.BarBackgroundColor = Color.Black;
+            Children.Add(locationNavPage);
+
+        }
+    }
+}

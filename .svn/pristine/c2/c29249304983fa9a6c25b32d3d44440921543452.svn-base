@@ -1,0 +1,29 @@
+﻿using AppProtoype.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Xamarin.Forms;
+
+namespace AppProtoype.Views
+{
+    public partial class ImageSliderView : ContentView
+    {
+        public ImageSliderView()
+        {
+            InitializeComponent();
+
+            HeightRequest = 200;
+
+
+
+            ImageSliderModelData sliderCollection = new ImageSliderModelData();
+            myCarousel.ItemsSource = sliderCollection.SliderCollection;
+            myCarousel.PageIndicators = true;
+            myCarousel.Arrows = true;
+
+        }
+    }
+}

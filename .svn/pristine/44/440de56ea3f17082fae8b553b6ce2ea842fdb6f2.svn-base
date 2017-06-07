@@ -1,0 +1,25 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+
+using Xamarin.Forms;
+
+namespace AppProtoype
+{
+    public class OfferPage : ContentPage
+    {
+        public OfferPage()
+        {
+            Title = "Offers";
+            Icon = "icon-offers.png";
+            Content = new StackLayout
+            {
+                Children = {
+                    new Label { Text = "Hello Offers Page" }
+                }
+            };
+        }
+    }
+}

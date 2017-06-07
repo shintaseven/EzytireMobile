@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppProtoype.Views.ImageSliderView"
+             xmlns:controls="clr-namespace:CarouselView.FormsPlugin.Abstractions;assembly=CarouselView.FormsPlugin.Abstractions">
+
+  <controls:CarouselViewControl x:Name="myCarousel">
+    <controls:CarouselViewControl.ItemTemplate>
+      
+      <!--this commented part is now translated to C# code on the code behind-->
+      <!--<DataTemplate>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <Image Grid.RowSpan="2" Aspect="AspectFill" Source="{Binding ImageUrl}"/>
+
+        </Grid>
+      </DataTemplate>-->
+    </controls:CarouselViewControl.ItemTemplate>
+  </controls:CarouselViewControl>
+
+</ContentView>

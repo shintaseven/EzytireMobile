@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AppProtoype.Models
+{
+    public class CouponModelData
+    {
+        public ObservableCollection<CouponModel> SliderCollection
+        {
+            get
+            {
+                return new ObservableCollection<CouponModel>
+                {
+                    new CouponModel
+                    {
+                        ImageUrl = "coupon-40rebate.jpg",
+                        ImageCaption = "Woodland Park Zoo"
+                    },
+                    new CouponModel
+                    {
+                        ImageUrl = "ad01.jpg",
+                        ImageCaption = "Woodland Park Zoo"
+                    },
+                     new CouponModel
+                    {
+                        ImageUrl =    "coupon-aircon.jpg",
+                        ImageCaption = "Cleveland Zoo"
+                     },
+                    new CouponModel
+                    {
+                        ImageUrl = "coupon-oilchange.jpg",
+                        ImageCaption = "Phoenix Zoo"
+                    }
+                };
+            }
+        }
+    }
+}

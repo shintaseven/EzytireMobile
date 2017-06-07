@@ -1,0 +1,226 @@
+﻿using AppProtoype.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using XamarinForms.SQLite;
+
+namespace AppProtoype.Services
+{
+    public class BayManagerService : IBayManagerService
+    {
+        HttpClient client;
+        public static string RestUrl = "http://ezytireservice.tireco-op.com/api/services/915";
+        // Credentials that are hard coded into the REST service
+        public static string Username = "Xamarin";
+        public static string Password = "Pa$$w0rd";
+
+        public List<ServiceModel> Items { get; private set; }
+
+        public BayManagerService()
+        {
+            var authData = string.Format("{0}:{1}", Username, Password);
+            var authHeaderValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(authData));
+
+            client = new HttpClient();
+            client.MaxResponseContentBufferSize = 256000;
+
+        }
+
+        public async Task<List<ServiceModel>> GetServicesByGarageID(StoreModel store)
+        {
+            List<ServiceModelAPI> apiServices = new List<ServiceModelAPI>();
+            List<ServiceModel> serviceList = new List<ServiceModel>();
+
+
+            try
+            {
+                RestUrl = "http://ezytireservice.tireco-op.com/api/services/" + store.GarageID.ToString();
+                //client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+                client.DefaultRequestHeaders.Add("GarageID", store.GarageID.ToString());
+                client.DefaultRequestHeaders.Add("KeyValue", store.BayManagerAPIToken);
+                var response = await client.GetAsync(RestUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    apiServices = JsonConvert.DeserializeObject<List<ServiceModelAPI>>(content);
+                }
+
+                if (apiServices != null && apiServices.Any())
+                {
+                    foreach (ServiceModelAPI apiresponse in apiServices)
+                    {
+                        serviceList.Add(new ServiceModel() { ServiceName = apiresponse.Name, ServiceID = apiresponse.Id });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(@"				ERROR {0}", ex.Message);
+            }
+
+            return serviceList;
+        }
+
+        public async Task<List<string>> GetStoreSchedule(AppointmentDetails appointment, List<int> selectedServiceIDs, DateTime dateSelected)
+        {
+            List<ServiceModelAPI> apiServices = new List<ServiceModelAPI>();
+            List<ServiceModel> serviceList = new List<ServiceModel>();
+            HttpClient client2 = new HttpClient();
+            List<string> times = new List<string>();
+
+            client2.MaxResponseContentBufferSize = 256000;
+            try
+            {
+                RestUrl = "http://ezytireservice.tireco-op.com/api/openings/" + appointment.SelectedStore.GarageID.ToString();
+
+
+                client2.DefaultRequestHeaders.Add("GarageID", appointment.SelectedStore.GarageID.ToString());
+                client2.DefaultRequestHeaders.Add("KeyValue", appointment.SelectedStore.BayManagerAPIToken);
+
+                string serviceIDsString = string.Empty;
+                foreach (int serviceID in selectedServiceIDs)
+                {
+                    serviceIDsString += serviceID;
+
+                    if (serviceID != selectedServiceIDs.Last())
+                    {
+                        serviceIDsString += ",";
+                    }
+                }
+
+                HttpContent content = new StringContent("{\"Day\":\""+ dateSelected.Day+ "\",\"Month\":\"" + dateSelected.Month + "\",\"Year\":\"" + dateSelected.Year + "\",\"Services\":["+ serviceIDsString + "], \"GarageID\":\"" + appointment.SelectedStore.GarageID.ToString() + "\"}", Encoding.UTF8, "application/json");
+
+                var response = await client2.PostAsync(RestUrl, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var contents = await response.Content.ReadAsStringAsync();
+                    dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(contents);
+                    //apiServices = JsonConvert.DeserializeObject<List<ServiceModelAPI>>(content);
+                    var responseJson = json["times"];
+
+                    Newtonsoft.Json.Linq.JObject jsonelement = responseJson[0];
+                    //int convertedHour = int.Parse(jsonelement["starthour"].ToString());
+                    //int convertedMinutes = int.Parse(jsonelement["startminute"].ToString());
+                    //appointment.StartTime = new TimeSpan(convertedHour, convertedMinutes, 0);
+
+                    int convertedDuration = int.Parse(jsonelement["duration"].ToString());
+                    appointment.Duration = convertedDuration;
+                    appointment.SelectedStore.BayID = jsonelement["bayid"].ToString();
+                    //appointment.FinishTime = appointment.StartTime.Add(new TimeSpan(0, convertedDuration,0));
+
+                    foreach (Newtonsoft.Json.Linq.JObject element in responseJson)
+                    {
+                        //appointment.SelectedStore.BayID = element["bayid"].ToString();
+                        times.Add(element["description"].ToString());
+                    }
+
+                    return times;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(@"				ERROR {0}", ex.Message);
+            }
+            return times;
+
+        }
+
+        public async Task<bool> BookAppointmentSchedule(AppointmentDetails appointment)
+        {
+            RestUrl = "http://ezytireservice.tireco-op.com//api/booking/";
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("GarageID", appointment.SelectedStore.GarageID.ToString());
+            client.DefaultRequestHeaders.Add("KeyValue", appointment.SelectedStore.BayManagerAPIToken);
+
+            string tempvar = string.Empty;
+            string serviceIDsString = string.Empty;
+            foreach (ServiceModel service in appointment.SelectedServices)
+            {
+                serviceIDsString += service.ServiceID.ToString();
+
+                if (service != appointment.SelectedServices.Last())
+                {
+                    serviceIDsString += ",";
+                }
+            }
+
+            DateTime dateCombination = new DateTime();
+            DateTime serviceStart = new DateTime();
+            DateTime serviceEnd = new DateTime();
+            TimeSpan selectedTime = new TimeSpan();
+            string selectedTimeString = appointment.AppointmentTime.Replace("PM", "");
+            selectedTimeString = selectedTimeString.Replace("AM", "");
+            if (appointment.AppointmentTime.Contains("PM"))
+            {
+                if (TimeSpan.TryParseExact(selectedTimeString, "g", CultureInfo.CurrentCulture, TimeSpanStyles.AssumeNegative, out selectedTime))
+                {
+                    dateCombination = appointment.AppointmentDate + selectedTime.Add(new TimeSpan(12, 0 ,0));
+                }
+                
+                
+            }
+            else
+            {
+                if (TimeSpan.TryParseExact(selectedTimeString, "g", CultureInfo.CurrentCulture, TimeSpanStyles.AssumeNegative, out selectedTime))
+                {
+                    dateCombination = appointment.AppointmentDate + selectedTime;
+                }
+            }
+
+            serviceStart = dateCombination;
+            serviceEnd = dateCombination.AddMinutes(appointment.Duration);
+
+            HttpContent content = new
+                StringContent("{\"GarageID\":\"" + appointment.SelectedStore.GarageID.ToString() +
+                "\",\"BayID \":\"" + appointment.SelectedStore.BayID.ToString() +
+                "\",\"TireID \":\"" + "-1" +
+                "\",\"VehicleID \":\"" + "-1" +
+                "\",\"Id \":\"" + "-1" +
+                "\",\"Duration\":\"" + appointment.Duration +
+                "\",\"Description\":\"" + "Description" +
+
+                "\",\"ConsumerID\":\"" + "-1" +
+                "\",\"ConsumerName\":\"" + appointment.UserDetails.FullName +
+                "\",\"ConsumerFirstName\":\"" + appointment.UserDetails.FullName +
+                "\",\"ConsumerLastName\":\"" + appointment.UserDetails.FullName +
+                "\",\"ConsumerAddress1\":\"" + appointment.UserDetails.Addressline +
+                "\",\"ConsumerAddress2\":\"" + "" +
+                "\",\"ConsumerCity\":\"" + appointment.UserDetails.City +
+                "\",\"ConsumerState\":\"" + appointment.UserDetails.StateCityRegion +
+                "\",\"ConsumerZip\":\"" + appointment.UserDetails.Zip +
+                "\",\"ConsumerEmail\":\"" + "test@gmail.com" +
+                "\",\"ConsumerPhone\":\"" + appointment.UserDetails.ContactNumber +
+                "\",\"ConsumerCellular\":\"" + appointment.UserDetails.ContactNumber +
+                "\",\"ConsumerVehicle\":\"" + "" +
+
+                "\",\"ColorCode\":\"" + "neutral" +
+                "\",\"ServiceIDs\":[" + serviceIDsString +
+                "],\"CreatedBy\":\"" + "admin" +
+
+                "\",\"StartTime\":\"" + serviceStart + //"2016-02-17 10:00:00.000" +
+                "\",\"FinishTime\":\"" + serviceEnd + //"2016-02-17 11:00:00.000" +
+                "\",\"VehicleYear\":\"" + appointment.UserDetails.VehicleYear +
+                "\",\"VehicleMake\":\"" + appointment.UserDetails.VehicleMake +
+                "\",\"VehicleModel\":\"" + appointment.UserDetails.VehicleModel +
+                "\",\"VehicleOption\":\"" + appointment.UserDetails.VehicleOption + "\"}", Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(RestUrl, content);
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+}

@@ -1,0 +1,227 @@
+﻿using AppProtoype.Models;
+using AppProtoype.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+
+using Xamarin.Forms;
+using XLabs.Forms.Controls;
+
+namespace AppProtoype
+{
+    public class AppointmentPage : ContentPage
+    {
+        ListView contentListView;
+        int _currentStep = 1;
+
+        public AppointmentPage(int storeID = 0, int prevStep = 0)
+        {
+            _currentStep = prevStep++;
+            StoreModelData storeCollection = new StoreModelData();
+            List<StoreModel> storeList = storeCollection.StoreCollection.ToList();
+
+            Title = "SCHEDULE APPOINTMENT";
+
+            Label stepTitle = new Label();
+            stepTitle.VerticalOptions = LayoutOptions.Center;
+            stepTitle.Text = GetStepLabelString();
+            stepTitle.TextColor = Color.White;
+            stepTitle.FontSize = 16;
+            stepTitle.FontAttributes = FontAttributes.Bold;
+            stepTitle.Margin = new Thickness(20, 0, 0, 0);
+
+            if (storeID == 0)
+            {
+
+                contentListView = new ListView { HasUnevenRows = true, BackgroundColor = Color.Transparent, SeparatorColor = Color.White, HorizontalOptions = LayoutOptions.FillAndExpand };
+
+                contentListView.ItemSelected += OnItemSelected;
+                contentListView.ItemTemplate = BuildCellViewDataTemplate();
+                contentListView.ItemsSource = storeList;
+
+                
+
+                Content = new StackLayout
+                {
+                    Children = {
+                        stepTitle,
+                        contentListView
+                    }
+                };
+            }
+            else
+            {
+                StoreModel currentStore = storeList.Find(s => s.StoreID == storeID);
+
+                if (currentStore == null) return;
+
+
+                string currentStoreText = @"Location: "
+                                            + "\n"
+                                            +currentStore.StoreName +"\n"
+                                            + currentStore.AddressDisplay;
+
+                Label selectedLocationLabel = new Label();
+                selectedLocationLabel.Text = currentStoreText;
+                selectedLocationLabel.VerticalOptions = LayoutOptions.Center;
+                selectedLocationLabel.TextColor = Color.White;
+                selectedLocationLabel.FontSize = 16;
+                selectedLocationLabel.FontAttributes = FontAttributes.Bold;
+                selectedLocationLabel.Margin = new Thickness(20, 0, 0, 0);
+
+                Content = new StackLayout
+                {
+                    Children = {
+                        stepTitle,
+                        selectedLocationLabel
+
+
+                    }
+                };
+            }
+            Padding = new Thickness(0, 20, 0, 20);
+
+            BackgroundImage = "bg-inner.jpg";
+        }
+
+        private DataTemplate BuildCellViewDataTemplate()
+        {
+            DataTemplate couponItemTemplate = new DataTemplate(() => {
+                var nativeCell = new StoreViewModel();
+
+
+                Label storeTitleLabel = new Label();
+                storeTitleLabel.VerticalOptions = LayoutOptions.Center;
+                storeTitleLabel.SetBinding(Label.TextProperty, "StoreName");
+                storeTitleLabel.FontSize = 14;
+
+                Image arrowImage = new Image();
+                arrowImage.Source = "offerarwbg.png";
+
+                nativeCell.SetBinding(StoreViewModel.Address1Property, "Address1");
+                nativeCell.SetBinding(StoreViewModel.CityProperty, "City");
+                nativeCell.SetBinding(StoreViewModel.StateProperty, "State");
+                nativeCell.SetBinding(StoreViewModel.ZipCodeProperty, "ZipCode");
+
+                Label addressLabel = new Label();
+                addressLabel.VerticalOptions = LayoutOptions.Start;
+                addressLabel.HorizontalOptions = LayoutOptions.Start;
+                addressLabel.SetBinding(Label.TextProperty, "AddressDisplay");
+                addressLabel.FontSize = 12;
+                addressLabel.TextColor = Color.FromHex("#A7A7A7");
+                //addressLabel.HeightRequest = 50;
+                Label contactLabel = new Label();
+
+                Label phoneDisplay = new Label();
+                phoneDisplay.VerticalOptions = LayoutOptions.Start;
+                phoneDisplay.HorizontalOptions = LayoutOptions.Start;
+                phoneDisplay.SetBinding(Label.TextProperty, "PhoneDisplay");
+                phoneDisplay.FontSize = 12;
+                phoneDisplay.TextColor = Color.FromHex("#A7A7A7");
+
+
+                RelativeLayout layout = new RelativeLayout();
+                //layout.BackgroundColor = Color.Blue;
+                layout.Children.Add(arrowImage,
+                    Constraint.Constant(0),
+                    Constraint.Constant(0),
+                    Constraint.RelativeToParent((parent) => { return parent.Width - 50; }),
+                    Constraint.RelativeToParent((parent) => { return parent.Height; }));
+
+                layout.Children.Add(storeTitleLabel,
+                    Constraint.Constant(0),
+                    Constraint.Constant(0),
+                    Constraint.RelativeToParent((parent) => { return parent.Width; }),
+                    Constraint.RelativeToParent((parent) => { return parent.Height; }));
+
+                var secondColStack = new StackLayout
+                {
+                    Padding = new Thickness(20, 5, 5, 5),
+                    Orientation = StackOrientation.Vertical,
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    Children = {
+                        layout,
+                        addressLabel,
+                        phoneDisplay
+                    }
+                };
+
+                nativeCell.View = secondColStack;
+                nativeCell.ForceUpdateSize();
+
+                return nativeCell;
+
+            });
+
+            return couponItemTemplate;
+        }
+
+        private StackLayout BuildStep2View(StoreModel currentStore)
+        {
+            var storeStack = new StackLayout
+            {
+                Padding = new Thickness(20, 5, 5, 5),
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Children = {
+
+                    }
+            };
+
+            var servicesStack = new StackLayout
+            {
+                Padding = new Thickness(20, 5, 5, 5),
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Children = {
+
+                    }
+            };
+
+
+            var contentStack = new StackLayout
+            {
+                Padding = new Thickness(20, 5, 5, 5),
+                Orientation = StackOrientation.Vertical,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Children = {
+                        
+                    }
+            };
+
+            return contentStack;
+        }
+
+        private string GetStepLabelString()
+        {
+            switch (_currentStep)
+            {
+                case 1: return "SELECT LOCATION";
+                case 2: return "SELECT SERVICES";
+                case 3: return "SELECT DATE AND TIME";
+                case 4: return "CONTACT DETAILS";
+                case 5: return "VEHICLE DETAILS";
+                case 6: return "CONFIRM DETAILS";
+                default: return "";
+            }
+        }
+
+        async void OnItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem == null)
+            {
+                return;
+            }
+
+            // Deselect row
+            contentListView.SelectedItem = null;
+
+            dynamic store = e.SelectedItem;
+
+            await Navigation.PushAsync(new AppointmentPage(store.StoreID, _currentStep));
+
+        }
+    }
+}

@@ -1,0 +1,236 @@
+﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+using AppProtoype.Models;
+using AppProtoype.ViewModels;
+using Xamarin.Forms;
+
+namespace AppProtoype
+{
+    public class OfferPage : ContentPage
+    {
+        ListView listView;
+
+        public OfferPage(int couponID = 0)
+        {
+            Title = "Offers";
+
+            CouponModelData sliderCollection = new CouponModelData();
+            List<CouponModel> sliderImages = sliderCollection.SliderCollection.ToList();
+            CouponModel currentCoupon = new CouponModel();
+
+
+            listView = new ListView { HasUnevenRows = true, BackgroundColor = Color.Transparent, SeparatorColor = Color.White, HorizontalOptions = LayoutOptions.FillAndExpand};
+
+            if (couponID > 0)
+            {
+                currentCoupon = sliderImages.Find(c => c.CouponID == couponID);
+
+                if (currentCoupon != null)
+                {
+                    List<CouponModel> singleSourceList = new List<CouponModel>();
+                    singleSourceList.Add(currentCoupon);
+                    listView.ItemsSource = singleSourceList;
+
+                    listView.ItemTemplate = BuildSingleOfferDataTemplate();
+                    listView.GestureRecognizers.Add(new TapGestureRecognizer());
+
+                    listView.HorizontalOptions = LayoutOptions.Center;
+
+                }
+                else
+                {
+                    listView.ItemSelected += OnItemSelected;
+                    listView.ItemTemplate = BuildCellViewDataTemplate();
+                    listView.ItemsSource = sliderImages;
+                }
+            }
+            else
+            {
+                listView.ItemSelected += OnItemSelected;
+                listView.ItemTemplate = BuildCellViewDataTemplate();
+                listView.ItemsSource = sliderImages;
+            }
+
+            Content = new StackLayout
+            {
+                Children = {
+                    listView
+                }
+            };
+
+            //var secondMainStackLayout = new StackLayout
+            //{
+            //    Padding = new Thickness(0, 0),
+            //    Orientation = StackOrientation.Vertical,
+            //    WidthRequest = 300,
+            //    HorizontalOptions = LayoutOptions.FillAndExpand,
+            //    Children = {
+            //           listView
+            //        }
+            //};
+
+            //var mainStackLayout = new StackLayout
+            //{
+            //    Padding = new Thickness(0, 0),
+            //    Orientation = StackOrientation.Vertical,
+            //    BackgroundColor = Color.Blue,
+            //    HorizontalOptions = LayoutOptions.FillAndExpand,
+            //    Children = {
+            //           secondMainStackLayout
+            //        }
+            //};
+
+            //Content = new StackLayout
+            //{
+            //    Children = {
+            //        mainStackLayout
+            //    }
+            //};
+
+            Padding = new Thickness(0, 20, 0, 20);
+            BackgroundImage = "bg-inner.jpg";
+        }
+
+        private DataTemplate BuildSingleOfferDataTemplate()
+        {
+            DataTemplate couponItemTemplate = new DataTemplate(() => {
+
+                var nativeCell = new CouponViewModel();
+
+                Label couponLabel = new Label();
+                couponLabel.VerticalOptions = LayoutOptions.Center;
+                couponLabel.SetBinding(Label.TextProperty, "Title");
+                couponLabel.HorizontalOptions = LayoutOptions.Center;
+                couponLabel.FontSize = 18;
+                couponLabel.FontAttributes = FontAttributes.Bold;
+                couponLabel.TextColor = Color.White;
+
+                Image couponImage = new Image();
+                couponImage.SetBinding(Image.SourceProperty, "ImageForInnerPage");
+
+                Label couponDetails = new Label();
+                couponDetails.VerticalOptions = LayoutOptions.Center;
+                couponDetails.SetBinding(Label.TextProperty, "MoreDetails");
+                couponDetails.FontSize = 12;
+                couponDetails.TextColor = Color.White;
+
+
+                var stackLayout = new StackLayout
+                {
+                    Padding = new Thickness(20, 5, 20, 5),
+                    Orientation = StackOrientation.Vertical,
+                    BackgroundColor = Color.Transparent,
+                    Children = {
+                        couponLabel,
+                        couponImage,
+                        couponDetails
+                    }
+                };
+
+                nativeCell.View = stackLayout;
+                return nativeCell;
+
+            });
+
+            return couponItemTemplate;
+        }
+
+        private DataTemplate BuildCellViewDataTemplate()
+        {
+            DataTemplate couponItemTemplate = new DataTemplate(() => {
+
+                var nativeCell = new CouponViewModel();
+
+                Image couponImage = new Image();
+                couponImage.SetBinding(Image.SourceProperty, "CategoryImage");
+                couponImage.WidthRequest = 50;
+     
+
+                Label couponLabel = new Label();
+                couponLabel.VerticalOptions = LayoutOptions.Center;
+                couponLabel.SetBinding(Label.TextProperty, "Title");
+                couponLabel.FontSize = 14;
+
+                Image arrowImage = new Image();
+                arrowImage.Source ="offerarwbg.png";
+
+                Label couponCaption = new Label();
+                couponCaption.VerticalOptions = LayoutOptions.Center;
+                couponCaption.HorizontalOptions = LayoutOptions.Start;
+                couponCaption.SetBinding(Label.TextProperty, "ImageCaption");
+                couponCaption.FontSize = 12;
+                couponCaption.TextColor = Color.FromHex("#A7A7A7");
+
+                RelativeLayout layout = new RelativeLayout();
+                //layout.BackgroundColor = Color.Blue;
+                layout.Children.Add(arrowImage,
+                    Constraint.Constant(0),
+                    Constraint.Constant(0),
+                    Constraint.RelativeToParent((parent) => { return parent.Width - 50; }),
+                    Constraint.RelativeToParent((parent) => { return parent.Height; }));
+
+                layout.Children.Add(couponLabel,
+                    Constraint.Constant(0),
+                    Constraint.Constant(0),
+                    Constraint.RelativeToParent((parent) => { return parent.Width; }),
+                    Constraint.RelativeToParent((parent) => { return parent.Height; }));
+
+                var secondColStack = new StackLayout
+                {
+                    Padding = new Thickness(5, 5, 5, 5),
+                    Orientation = StackOrientation.Vertical,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Children = {
+                        layout,
+                        couponCaption
+                    }
+                };
+
+                var stackLayout = new StackLayout
+                {
+                    //Padding = new Thickness(5, 5, 5, 5),
+                    Orientation = StackOrientation.Horizontal,
+                    //BackgroundColor = Color.Blue,
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    Children = {
+                        couponImage,
+                        secondColStack
+                    }
+                };
+
+                nativeCell.View = stackLayout;
+
+                return nativeCell;
+
+            });
+
+            return couponItemTemplate;
+        }
+
+        async void OnItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem == null)
+            {
+                return;
+            }
+
+            // Deselect row
+            listView.SelectedItem = null;
+
+            dynamic coupon = e.SelectedItem;
+
+            await Navigation.PushAsync(new OfferPage(coupon.CouponID));
+            
+        }
+
+        async void ExitOfferPage(object sender, EventArgs e)
+        {
+            MainPage main = new MainPage();
+            await Navigation.PopModalAsync();
+        }
+    }
+}

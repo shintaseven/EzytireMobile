@@ -1,0 +1,152 @@
+﻿using AppProtoype.Shared;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AppProtoype.Models
+{
+    public class CouponModelData
+    {
+        public ObservableCollection<CouponModel> SliderCollection
+        {
+            get
+            {
+                return new ObservableCollection<CouponModel>
+                {
+                    new CouponModel
+                    {
+                        CouponID = 1,
+                        Category = CouponCategoryEnum.OilChange,
+                        CategoryImage = GetCategoryImage(CouponCategoryEnum.OilChange),
+                        Title = "$19.50 OIL CHANGE",
+                        ImageSliderUrl = "coupon-40rebate.jpg",
+                        ImageForInnerPage = "couponoilch.png",
+                        ImageCaption = "Buy 4 select Bridgestone tires and get a $70 Visa® Prepaid Card mail-in rebate. Offer is valid from July 25, 2016 to August 21, 2016.",
+                        MoreDetails = @"$70.00
+                                DRIVEGUARD
+                                DUELER A/T REVO 2
+                                DUELER H/L 422 ECOPIA (ECO)
+                                DUELER H/L ALENZA
+                                DUELER H/L ALENZA PLUS
+                                DUELER H/P SPORT
+                                DUELER H/P SPORT AS
+                                ECOPIA EP422 (ECO)
+                                ECOPIA EP422 PLUS
+                                ECOPIA H/L 422 PLUS
+                                POTENZA RE050
+                                POTENZA RE050 RFT/MOE WITH UNI-T
+                                POTENZA RE050A
+                                POTENZA RE050A RFT/MOE/II
+                                POTENZA RE-11
+                                POTENZA RE-71R
+                                POTENZA RE760 SPORT UNI-T
+                                POTENZA RE960 A/S POLE POSITION RFT
+                                POTENZA RE97 A/S
+                                POTENZA RE970AS POLE POSITION
+                                POTENZA S-04 POLE POSITION
+                                TURANZA SERENITY PLUS"
+
+                    },
+                    new CouponModel
+                    {
+                        CouponID = 2,
+                        Title = "$75 OFF NEW TIRES",
+                        Category = CouponCategoryEnum.Maintenance,
+                        CategoryImage = GetCategoryImage(CouponCategoryEnum.NewTire),
+                        ImageSliderUrl = "ad01.jpg",
+                        ImageForInnerPage = "couponnewtires.png",
+                        ImageCaption = "Buy 4 select Hankook tires from August 1, 2016 to September 30, 2016 and get up to $100 rebate.",
+                        MoreDetails = @" $100.00
+                                    DYNAPRO HP2 RA33
+                                    KINERGY GT H436
+                                    VENTUS V12 EVO2 K120
+
+                                    $80.00
+                                    VENTUS S1 NOBLE2 H452
+
+                                    $50.00
+                                    DYNAPRO ATM RF10
+                                    DYNAPRO HT RH12 (LT-METRIC)
+                                    DYNAPRO HT RH12 (P-METRIC)
+                                    OPTIMO H727"
+                    },
+                     new CouponModel
+                    {
+                        CouponID = 3,
+                        Title = "$20 OFF ALIGNMENT",
+                        Category = CouponCategoryEnum.Alignment,
+                        CategoryImage = GetCategoryImage(CouponCategoryEnum.Alignment),
+                        ImageSliderUrl =    "coupon-aircon.jpg",
+                        ImageForInnerPage = "couponalign.png",
+                        ImageCaption = "Buy 4 select Bridgestone tires and get a $70 Visa® Prepaid Card mail-in rebate. Offer is valid from July 25, 2016 to August 21, 2016.",
+                        MoreDetails = @"$60.00
+                                    Double your rebate up to $120 when the purchase is made on your Goodyear Credit Card.
+                                    ASSURANCE COMFORTRED TOURING
+                                    WRANGLER AT ADVENTURE
+                                    WRANGLER MT/R WITH KEVLAR
+
+                                    $40.00
+                                    Double to $80 when purchased on a Goodyear Credit Card
+                                    ASSURANCE A/S
+                                    ASSURANCE CS FUEL MAX
+                                    ASSURANCE CS TRIPLETRED A/S
+                                    ASSURANCE FUEL MAX
+                                    ASSURANCE TRIPLETRED A/S
+                                    EAGLE SPORT ALL-SEASON
+                                    WRANGLER FORTITUDE H/T
+                                    WRANGLER SR-A"
+                     },
+                    new CouponModel
+                    {
+                        CouponID = 4,
+                        Title = "$10 OFF BREAK",
+                        Category = CouponCategoryEnum.Brake,
+                        CategoryImage = GetCategoryImage(CouponCategoryEnum.Brake),
+                        ImageSliderUrl = "coupon-oilchange.jpg",
+                        ImageForInnerPage = "couponbrake.png",
+                        ImageCaption = "Buy 4 select Hankook tires from August 1, 2016 to September 30, 2016 and get up to $100 rebate.",
+                        MoreDetails = @"$60.00
+                                    Double your rebate up to $120 when the purchase is made on your Goodyear Credit Card.
+                                    ASSURANCE COMFORTRED TOURING
+                                    WRANGLER AT ADVENTURE
+                                    WRANGLER MT/R WITH KEVLAR
+
+                                    $40.00
+                                    Double to $80 when purchased on a Goodyear Credit Card
+                                    ASSURANCE A/S
+                                    ASSURANCE CS FUEL MAX
+                                    ASSURANCE CS TRIPLETRED A/S
+                                    ASSURANCE FUEL MAX
+                                    ASSURANCE TRIPLETRED A/S
+                                    EAGLE SPORT ALL-SEASON
+                                    WRANGLER FORTITUDE H/T
+                                    WRANGLER SR-A"
+                    }
+                };
+            }
+        }
+
+        private string GetCategoryImage(CouponCategoryEnum category)
+        {
+            switch (category)
+            {
+                case CouponCategoryEnum.OilChange:
+                    return "coupicooilch.png";
+                case CouponCategoryEnum.Maintenance:
+                    return "couponnewtires.png";
+                case CouponCategoryEnum.Alignment:
+                    return "coupicoalign.png";
+                case CouponCategoryEnum.Brake:
+                    return "coupicobrake.png";
+                case CouponCategoryEnum.NewTire:
+                    return "coupicotire.png";
+
+                default: return "noimage.png";
+            }
+
+        }
+    }
+}

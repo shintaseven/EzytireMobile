@@ -1,0 +1,82 @@
+﻿using AppProtoype.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Xamarin.Forms;
+
+namespace AppProtoype.Views
+{
+    public partial class ImageSliderView : ContentView
+    {
+        public ImageSliderView()
+        {
+            InitializeComponent();
+
+            HeightRequest = 200;
+
+
+            DataTemplate sliderDataTemplate = BuildSliderViewDataTemplate();
+
+            CouponModelData sliderCollection = new CouponModelData();
+            List<CouponModel> sliderImages = sliderCollection.SliderCollection.ToList();
+
+
+            BuildSliderView(sliderDataTemplate, sliderImages);
+        }
+
+        private void BuildSliderView(DataTemplate dataTemplate, List<CouponModel> sliderImages)
+        {
+            //myCarousel object is declared on the xml page
+            myCarousel.ItemsSource = sliderImages; //sliderCollection.SliderCollection;
+            myCarousel.ItemTemplate = dataTemplate;
+            myCarousel.PageIndicators = true;
+        }
+
+        private DataTemplate BuildSliderViewDataTemplate()
+        {
+            var tapGestureRecognizer = new TapGestureRecognizer();
+            tapGestureRecognizer.Tapped += OnTapGestureRecognizerTapped;
+
+            DataTemplate sliderDataTemplate = new DataTemplate(() => {
+                Grid grid = new Grid
+                {
+                    RowDefinitions =
+                    {
+                        new RowDefinition { Height = GridLength.Auto },
+                        new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }
+
+                    }
+                };
+
+                Image sliderImage = new Image();
+                sliderImage.SetBinding(Image.SourceProperty, "ImageUrl");
+
+
+                sliderImage.GestureRecognizers.Add(tapGestureRecognizer);
+                //tapGestureRecognizer.Tapped += (s, e) =>
+                //{
+                //    sliderImage.Opacity = .5;
+
+                //};
+                //sliderImage.GestureRecognizers.Add(tapGestureRecognizer);
+
+                grid.Children.Add(sliderImage, 0, 0);
+                Grid.SetRowSpan(sliderImage, 2);
+
+                return grid;
+            });
+
+            return sliderDataTemplate;
+        }
+
+        private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
+        {
+
+            Navigation.PushAsync(new OfferPage());
+            
+        }
+    }
+}

@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AppProtoype.Models
+{
+    public class StoreModelData
+    {
+        public ObservableCollection<StoreModel> StoreCollection
+        {
+            get
+            {
+                return new ObservableCollection<StoreModel>
+                {
+                    new StoreModel
+                    {
+                        StoreID = 1,
+                        StoreName = "Ezytire Store 1",
+                        Address1 = "N. 91st Ave",
+                        City = "Peoria",
+                        State = "Arizona",
+                        ZipCode = "11790",
+                        ContactNumber = "623-500-4127",
+                        StoreImage = "locimg01.jpg"
+
+                    },
+                    new StoreModel
+                    {
+                        StoreID = 2,
+                        StoreName = "Ezytire Store 2",
+                        Address1 = "West Bell Rd",
+                        City = "Surprise",
+                        State = "Arizona",
+                        ZipCode = "13323",
+                        ContactNumber = "623-500-4127",
+                        StoreImage = "locimg02.jpg"
+
+                    },
+                    new StoreModel
+                    {
+                        StoreID = 3,
+                        StoreName = "Ezytire Store 3",
+                        Address1 = "North Dysart",
+                        City = "Goodyear",
+                        State = "Arizona",
+                        ZipCode = "800",
+                        ContactNumber = "623-500-4127",
+                        StoreImage = "locimg03.jpg"
+
+                    }
+
+                };
+            }
+            
+        }
+
+
+    }
+}
